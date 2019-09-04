@@ -124,7 +124,18 @@ class Container extends Component<ContainerProps> {
   }
 
   getContainer() {
-    return this.containerRef.current
+    const container = this.containerRef.current
+    if (container) {
+      const children = (container as HTMLElement).children
+      if (children && children.length) {
+        Array.from(children).forEach(child => {
+          if (!child.classList.contains('smooth-dnd-draggable-wrapper')) {
+            child.classList.add('smooth-dnd-draggable-wrapper')
+          }
+        })
+      }
+    }
+    return container
   }
 
   getContainerOptions(): ContainerOptions {

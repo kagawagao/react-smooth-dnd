@@ -74,8 +74,10 @@ class Container extends Component<ContainerProps> {
   }
 
   componentWillUnmount() {
-    this.container.dispose()
-    this.container = null!
+    if (this.container) {
+      this.container.dispose()
+      this.container = null!
+    }
   }
 
   componentDidUpdate(prevProps: ContainerProps) {

@@ -1,14 +1,10 @@
 import React, { Component, CSSProperties } from 'react'
 import PropTypes from 'prop-types'
-import {
-  smoothDnD as container,
-  ContainerOptions,
-  SmoothDnD,
-} from '@cisdi/smooth-dnd'
+import { smoothDnD, ContainerOptions, SmoothDnD } from '@cisdi/smooth-dnd'
 import { dropHandlers } from '@cisdi/smooth-dnd'
 
-container.dropHandler = dropHandlers.reactDropHandler().handler
-container.wrapChild = false
+smoothDnD.dropHandler = dropHandlers.reactDropHandler().handler
+smoothDnD.wrapChild = false
 
 interface ContainerProps extends ContainerOptions {
   render?: (rootRef: React.RefObject<any>) => React.ReactElement
@@ -70,7 +66,7 @@ class Container extends Component<ContainerProps> {
     const container = this.getContainer()
     if (container) {
       this.prevContainer = container
-      this.container = container(
+      this.container = smoothDnD(
         this.getContainer(),
         this.getContainerOptions()
       )
@@ -89,7 +85,7 @@ class Container extends Component<ContainerProps> {
         if (this.container) {
           this.container.dispose()
         }
-        this.container = container(container, this.getContainerOptions())
+        this.container = smoothDnD(container, this.getContainerOptions())
         this.prevContainer = container
         return
       }

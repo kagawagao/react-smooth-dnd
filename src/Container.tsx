@@ -67,8 +67,14 @@ class Container extends Component<ContainerProps> {
   }
 
   componentDidMount() {
-    this.prevContainer = this.getContainer()
-    this.container = container(this.getContainer(), this.getContainerOptions())
+    const container = this.getContainer()
+    if (container) {
+      this.prevContainer = container
+      this.container = container(
+        this.getContainer(),
+        this.getContainerOptions()
+      )
+    }
   }
 
   componentWillUnmount() {
@@ -77,18 +83,18 @@ class Container extends Component<ContainerProps> {
   }
 
   componentDidUpdate(prevProps: ContainerProps) {
-    if (this.getContainer()) {
-      if (this.prevContainer && this.prevContainer !== this.getContainer()) {
-        this.container.dispose()
-        this.container = container(
-          this.getContainer(),
-          this.getContainerOptions()
-        )
-        this.prevContainer = this.getContainer()
+    const container = this.getContainer()
+    if (container) {
+      if (this.prevContainer && this.prevContainer !== container) {
+        if (this.container) {
+          this.container.dispose()
+        }
+        this.container = container(container, this.getContainerOptions())
+        this.prevContainer = container
         return
       }
 
-      if (this.isObjectTypePropsChanged(prevProps)) {
+      if (this.isObjectTypePropsChanged(prevProps) && this.container) {
         this.container.setOptions(this.getContainerOptions())
       }
     }

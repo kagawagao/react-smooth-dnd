@@ -1,4 +1,4 @@
-import React, { Component, CSSProperties } from 'react'
+import React, { Component, CSSProperties, RefObject } from 'react'
 import PropTypes from 'prop-types'
 import { smoothDnD, ContainerOptions, SmoothDnD } from '@cisdi/smooth-dnd'
 import { dropHandlers } from '@cisdi/smooth-dnd'
@@ -6,8 +6,10 @@ import { dropHandlers } from '@cisdi/smooth-dnd'
 smoothDnD.dropHandler = dropHandlers.reactDropHandler().handler
 smoothDnD.wrapChild = false
 
+type RefCallback = (el: HTMLElement | string | null) => void
+
 interface ContainerProps extends ContainerOptions {
-  render?: (rootRef: React.RefObject<any>) => React.ReactElement
+  render?: (refCb: RefCallback) => React.ReactElement
   style?: CSSProperties
 }
 
@@ -51,26 +53,17 @@ class Container extends Component<ContainerProps> {
     orientation: 'vertical',
   }
 
-  prevContainer: null
+  prevContainer: null | HTMLElement
+  el: HTMLElement | null
   container: SmoothDnD = null!
   containerRef: React.RefObject<any> = React.createRef()
   constructor(props: ContainerProps) {
     super(props)
     this.getContainerOptions = this.getContainerOptions.bind(this)
-    this.getContainer = this.getContainer.bind(this)
+    this.initialDnD = this.initialDnD.bind(this)
     this.isObjectTypePropsChanged = this.isObjectTypePropsChanged.bind(this)
     this.prevContainer = null
-  }
-
-  componentDidMount() {
-    const container = this.getContainer()
-    if (container) {
-      this.prevContainer = container
-      this.container = smoothDnD(
-        this.getContainer(),
-        this.getContainerOptions()
-      )
-    }
+    this.el = null
   }
 
   componentWillUnmount() {
@@ -81,25 +74,8 @@ class Container extends Component<ContainerProps> {
   }
 
   componentDidUpdate(prevProps: ContainerProps) {
-    const container = this.getContainer()
-    if (container) {
-      if (this.prevContainer && this.prevContainer !== container) {
-        if (this.container) {
-          this.container.dispose()
-        }
-        this.container = smoothDnD(container, this.getContainerOptions())
-        this.prevContainer = container
-        return
-      }
-
-      if (this.isObjectTypePropsChanged(prevProps) && this.container) {
-        this.container.setOptions(this.getContainerOptions())
-      }
-    } else {
-      this.prevContainer = container
-      if (this.container) {
-        this.container.dispose()
-      }
+    if (this.isObjectTypePropsChanged(prevProps) && this.container) {
+      this.container.setOptions(this.getContainerOptions())
     }
   }
 
@@ -120,21 +96,14 @@ class Container extends Component<ContainerProps> {
     return false
   }
 
-  render() {
-    if (this.props.render) {
-      return this.props.render(this.containerRef)
-    } else {
-      return (
-        <div style={this.props.style} ref={this.containerRef}>
-          {this.props.children}
-        </div>
-      )
+  initialDnD(el: HTMLElement | string | null) {
+    if (this.container || !el || typeof el === 'string') {
+      this.container.dispose()
     }
-  }
-
-  getContainer() {
-    const container = this.containerRef.current
-    return container
+    if (el && typeof el !== 'string') {
+      this.el = el
+      this.container = smoothDnD(el, this.getContainerOptions())
+    }
   }
 
   getContainerOptions(): ContainerOptions {
@@ -152,6 +121,18 @@ class Container extends Component<ContainerProps> {
 
       return result
     }, {}) as ContainerOptions
+  }
+
+  render() {
+    if (this.props.render) {
+      return this.props.render(this.initialDnD)
+    } else {
+      return (
+        <div style={this.props.style} ref={this.initialDnD}>
+          {this.props.children}
+        </div>
+      )
+    }
   }
 }
 

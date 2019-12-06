@@ -97,18 +97,14 @@ class Container extends Component<ContainerProps> {
   }
 
   initialDnD(el: HTMLElement | string | null) {
-    if (this.container && el === this.el) {
-      if (this.isObjectTypePropsChanged(prevProps) && this.container) {
-        this.container.setOptions(this.getContainerOptions())
-      }
-    } else {
+    if (el && typeof el !== 'string' && el !== this.el) {
       if (this.container) {
         this.container.dispose()
       }
-      if (el && typeof el !== 'string') {
-        this.el = el
-        this.container = smoothDnD(el, this.getContainerOptions())
-      }
+      this.el = el
+      this.container = smoothDnD(el, this.getContainerOptions())
+    } else if (!el && this.container) {
+      this.container.dispose()
     }
   }
 

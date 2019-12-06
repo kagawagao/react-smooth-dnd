@@ -95,6 +95,11 @@ class Container extends Component<ContainerProps> {
       if (this.isObjectTypePropsChanged(prevProps) && this.container) {
         this.container.setOptions(this.getContainerOptions())
       }
+    } else {
+      this.prevContainer = container
+      if (this.container) {
+        this.container.dispose()
+      }
     }
   }
 

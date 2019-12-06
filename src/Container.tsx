@@ -103,8 +103,6 @@ class Container extends Component<ContainerProps> {
       }
       this.el = el
       this.container = smoothDnD(el, this.getContainerOptions())
-    } else if (!el && this.container) {
-      this.container.dispose()
     }
   }
 

@@ -97,7 +97,7 @@ class Container extends Component<ContainerProps> {
   }
 
   initialDnD(el: HTMLElement | string | null) {
-    if (this.container || !el || typeof el === 'string') {
+    if (this.container) {
       this.container.dispose()
     }
     if (el && typeof el !== 'string') {
